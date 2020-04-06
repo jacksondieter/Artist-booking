@@ -43,7 +43,19 @@ class Venue(db.Model):
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
 
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
+# TODO: implement any missing fields, as a database migration using Flask-Migrate
+    # genres = db.Column(db.Array(String(50))
+    genres = db.Column(db.String(500))
+    website = db.Column(db.String(500))
+    seeking_talent = db.Column(db.Boolean)
+    seeking_description = db.Column(db.String(500))
+
+    #artists = db.relationship("Show", back_populates="venue")
+
+    #past_shows(artist_id, artist_image_link,start_time)
+    #upcoming_shows(artist_id, artist_image_link,start_time)
+    # past_shows_count(int)
+    # upcoming_shows_count(int)
 
 
 class Artist(db.Model):
@@ -54,13 +66,36 @@ class Artist(db.Model):
     city = db.Column(db.String(120))
     state = db.Column(db.String(120))
     phone = db.Column(db.String(120))
-    genres = db.Column(db.String(120))
+    # genres = db.Column(db.Array(String(50))
+    genres = db.Column(db.String(500))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
+    website = db.Column(db.String(500))
+    seeking_venue = db.Column(db.Boolean)
+    seeking_description = db.Column(db.String(500))
+
+    #venues = relationship("Show", back_populates="artist")
+
+    #past_shows(venue_id, venue_name,venue_image_link,start_time)
+    #upcoming_shows(venue_id, venue_name,venue_image_link,start_time)
+    # past_shows_count(int)
+    # upcoming_shows_count(int)
+
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
+
+
+""" 
+class Show(db.Model):
+    __tablename__ = 'Show'
+    venue_id =  db.Column(db.Integer, db.ForeignKey('Venue.id'),primary_key=True)
+    artist_id =  db.Column(db.Integer, db.ForeignKey('Artist.id'),primary_key=True)
+    start_time = db.Column(db.DateTime)
+    artist = relationship("Artist", back_populates="venues")
+    venue = relationship("Venue", back_populates="artists")
+ """
 
 #----------------------------------------------------------------------------#
 # Filters.
