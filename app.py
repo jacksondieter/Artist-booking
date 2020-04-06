@@ -31,6 +31,17 @@ migrate = Migrate(app, db)
 #----------------------------------------------------------------------------#
 
 
+class Show(db.Model):
+    __tablename__ = 'Show'
+    venue_id = db.Column(db.Integer, db.ForeignKey(
+        'Venue.id'), primary_key=True)
+    artist_id = db.Column(db.Integer, db.ForeignKey(
+        'Artist.id'), primary_key=True)
+    start_time = db.Column(db.DateTime)
+    artist = db.relationship("Artist", back_populates="venues")
+    venue = db.relationship("Venue", back_populates="artists")
+
+
 class Venue(db.Model):
     __tablename__ = 'Venue'
 
@@ -50,7 +61,7 @@ class Venue(db.Model):
     seeking_talent = db.Column(db.Boolean)
     seeking_description = db.Column(db.String(500))
 
-    #artists = db.relationship("Show", back_populates="venue")
+    artists = db.relationship("Show", back_populates="venue")
 
     #past_shows(artist_id, artist_image_link,start_time)
     #upcoming_shows(artist_id, artist_image_link,start_time)
@@ -77,7 +88,7 @@ class Artist(db.Model):
     seeking_venue = db.Column(db.Boolean)
     seeking_description = db.Column(db.String(500))
 
-    #venues = relationship("Show", back_populates="artist")
+    venues = db.relationship("Show", back_populates="artist")
 
     #past_shows(venue_id, venue_name,venue_image_link,start_time)
     #upcoming_shows(venue_id, venue_name,venue_image_link,start_time)
@@ -85,17 +96,6 @@ class Artist(db.Model):
     # upcoming_shows_count(int)
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
-
-
-""" 
-class Show(db.Model):
-    __tablename__ = 'Show'
-    venue_id =  db.Column(db.Integer, db.ForeignKey('Venue.id'),primary_key=True)
-    artist_id =  db.Column(db.Integer, db.ForeignKey('Artist.id'),primary_key=True)
-    start_time = db.Column(db.DateTime)
-    artist = relationship("Artist", back_populates="venues")
-    venue = relationship("Venue", back_populates="artists")
- """
 
 #----------------------------------------------------------------------------#
 # Filters.
