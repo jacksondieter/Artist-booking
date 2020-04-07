@@ -9,6 +9,7 @@ from flask import Flask, render_template, request, Response, flash, redirect, ur
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from models import db, Show, Venue, Artist
 import logging
 from logging import Formatter, FileHandler
 from flask_wtf import Form
@@ -20,82 +21,8 @@ from forms import *
 app = Flask(__name__)
 moment = Moment(app)
 app.config.from_object('config')
-db = SQLAlchemy(app)
-
+db.init_app(app)
 migrate = Migrate(app, db)
-
-# TODO: connect to a local postgresql database
-
-#----------------------------------------------------------------------------#
-# Models.
-#----------------------------------------------------------------------------#
-
-
-class Show(db.Model):
-    __tablename__ = 'Show'
-    venue_id = db.Column(db.Integer, db.ForeignKey(
-        'Venue.id'), primary_key=True)
-    artist_id = db.Column(db.Integer, db.ForeignKey(
-        'Artist.id'), primary_key=True)
-    start_time = db.Column(db.DateTime)
-    artist = db.relationship("Artist", back_populates="venues")
-    venue = db.relationship("Venue", back_populates="artists")
-
-
-class Venue(db.Model):
-    __tablename__ = 'Venue'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    address = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    image_link = db.Column(db.String(500))
-    facebook_link = db.Column(db.String(120))
-
-# TODO: implement any missing fields, as a database migration using Flask-Migrate
-    # genres = db.Column(db.Array(String(50))
-    genres = db.Column(db.String(500))
-    website = db.Column(db.String(500))
-    seeking_talent = db.Column(db.Boolean)
-    seeking_description = db.Column(db.String(500))
-
-    artists = db.relationship("Show", back_populates="venue")
-
-    #past_shows(artist_id, artist_image_link,start_time)
-    #upcoming_shows(artist_id, artist_image_link,start_time)
-    # past_shows_count(int)
-    # upcoming_shows_count(int)
-
-
-class Artist(db.Model):
-    __tablename__ = 'Artist'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    # genres = db.Column(db.Array(String(50))
-    genres = db.Column(db.String(500))
-    image_link = db.Column(db.String(500))
-    facebook_link = db.Column(db.String(120))
-
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
-
-    website = db.Column(db.String(500))
-    seeking_venue = db.Column(db.Boolean)
-    seeking_description = db.Column(db.String(500))
-
-    venues = db.relationship("Show", back_populates="artist")
-
-    #past_shows(venue_id, venue_name,venue_image_link,start_time)
-    #upcoming_shows(venue_id, venue_name,venue_image_link,start_time)
-    # past_shows_count(int)
-    # upcoming_shows_count(int)
-
-# TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
 
 #----------------------------------------------------------------------------#
 # Filters.
