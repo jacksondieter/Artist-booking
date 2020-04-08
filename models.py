@@ -16,8 +16,8 @@ class Show(db.Model):
     artist_id = db.Column(db.Integer, db.ForeignKey(
         'Artist.id'))
     start_time = db.Column(db.DateTime, nullable=False)
-    artist = db.relationship("Artist", back_populates="venues")
-    venue = db.relationship("Venue", back_populates="artists")
+    artist = db.relationship("Artist", backref="show")
+    venue = db.relationship("Venue", backref="show")
 
     def long_dict(self):
         return {
@@ -66,7 +66,7 @@ class Venue(db.Model):
     website = db.Column(db.String(500))
     seeking_talent = db.Column(db.Boolean)
     seeking_description = db.Column(db.String(500))
-    artists = db.relationship("Show", back_populates="venue")
+    #artists = db.relationship("Show", back_populates="venue")
 
     def __init__(self, name='', city='', state='', address='', phone='', image_link='', facebook_link='', genres='', website='', seeking_talent=False, seeking_description=''):
         self.name = name
@@ -129,7 +129,7 @@ class Artist(db.Model):
     seeking_venue = db.Column(db.Boolean)
     seeking_description = db.Column(db.String(500))
 
-    venues = db.relationship("Show", back_populates="artist")
+    #venues = db.relationship("Show", back_populates="artist")
 
     def __init__(self, name='', city='', state='', phone='', image_link='', facebook_link='', genres='', website='', seeking_venue=False, seeking_description=''):
         self.name = name
