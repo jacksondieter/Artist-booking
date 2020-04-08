@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+import datetime
 
 db = SQLAlchemy()
 
@@ -11,9 +12,9 @@ class Show(db.Model):
     __tablename__ = 'Show'
     id = db.Column(db.Integer, primary_key=True)
     venue_id = db.Column(db.Integer, db.ForeignKey(
-        'Venue.id'), nullable=False)
+        'Venue.id'))
     artist_id = db.Column(db.Integer, db.ForeignKey(
-        'Artist.id'), nullable=False)
+        'Artist.id'))
     start_time = db.Column(db.DateTime, nullable=False)
     artist = db.relationship("Artist", back_populates="venues")
     venue = db.relationship("Venue", back_populates="artists")
@@ -21,12 +22,28 @@ class Show(db.Model):
     def long_dict(self):
         return {
             'id': self.id,
-            'venue_id': self.venue_id,
-            'venue_name': self.venue.name,
-            'venue_image_link': self.venue.image_link,
+            'venue_id': self.Venue.id,
+            'venue_name': self.Venue.name,
+            'venue_image_link': self.Venue.image_link,
             'artist_id': self.artist_id,
             'artist_name': self.artist.name,
             'artist_image_link': self.artist.image_link,
+            'start_time': self.start_time.isoformat()
+        }
+
+    def dict_for_venue(self):
+        return {
+            'artist_id': self.artist_id,
+            'artist_name': self.artist.name,
+            'artist_image_link': self.artist.image_link,
+            'start_time': self.start_time.isoformat()
+        }
+
+    def dict_for_artist(self):
+        return {
+            'venue_id': self.venue_id,
+            'venue_name': self.venue.name,
+            'venue_image_link': self.venue.image_link,
             'start_time': self.start_time.isoformat()
         }
 
@@ -78,6 +95,13 @@ class Venue(db.Model):
             'website': self.website,
             'seeking_talent': self.seeking_talent,
             'seeking_description': self.seeking_description
+        }
+
+    def short_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'image_link': self.image_link
         }
 
     def __repr__(self):
@@ -132,6 +156,13 @@ class Artist(db.Model):
             'website': self.website,
             'seeking_venue': self.seeking_venue,
             'seeking_description': self.seeking_description
+        }
+
+    def short_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'image_link': self.image_link
         }
 
     def __repr__(self):

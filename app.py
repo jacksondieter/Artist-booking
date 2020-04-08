@@ -15,6 +15,7 @@ from logging import Formatter, FileHandler
 from flask_wtf import Form
 from forms import *
 from models import Show, Venue, Artist, db
+import sys
 
 #----------------------------------------------------------------------------#
 # App Config.
@@ -63,10 +64,14 @@ def split_show_by_time(shows):
 
 def get_show_by_venue(venue_id):
     shows = Show.query.filter_by(venue_id=venue_id).all()
+    show_for_venue = [show.dict_for_venue for show in shows]
+    return split_show_by_time(show_for_venue)
 
 
 def get_show_by_artist(artist_id):
     show = Show.query.filter_by(artist_id=artist_id).all()
+    show_for_artist = [show.dict_for_artist for show in shows]
+    return split_show_by_time(show_for_artist)
 
 
 app.jinja_env.filters['datetime'] = format_datetime
@@ -101,7 +106,7 @@ def venues():
     venues_by_zone = [{
         'city': city,
         'state': state,
-        'venues': list(filter(lambda x: x.city == city, venues))
+        'venues': [v.short_dict() for v in venues if v.city == city]
     }for state, city in zone]
     print(venues_by_zone)
     return render_template('pages/venues.html', areas=venues_by_zone)
@@ -124,10 +129,7 @@ def search_venues():
     venues = Venue.query.filter(Venue.name.ilike('%'+search+'%')).all()
     response = {
         'count': len(venues),
-        'data': [{
-            'id': venue.id,
-            'name': venue.name,
-        } for venue in venues]
+        'data': [venue.short_dict() for venue in venues]
     }
     return render_template('pages/search_venues.html', results=response, search_term=request.form.get('search_term', ''))
 
@@ -215,8 +217,8 @@ def delete_venue(venue_id):
 #  ----------------------------------------------------------------
 @app.route('/artists')
 def artists():
-    # TODO: replace with real data returned from querying the database
-    data = [{
+    # replace with real data returned from querying the database
+    '''data = [{
         "id": 4,
         "name": "Guns N Petals",
     }, {
@@ -225,22 +227,30 @@ def artists():
     }, {
         "id": 6,
         "name": "The Wild Sax Band",
-    }]
+    }]'''
+    artists = Artist.query.all()
+    data = [artist.short_dict() for artist in artists]
     return render_template('pages/artists.html', artists=data)
 
 
 @app.route('/artists/search', methods=['POST'])
 def search_artists():
-    # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
+    # implement search on artists with partial string search. Ensure it is case-insensitive.
     # seach for "A" should return "Guns N Petals", "Matt Quevado", and "The Wild Sax Band".
     # search for "band" should return "The Wild Sax Band".
-    response = {
+    '''response = {
         "count": 1,
         "data": [{
             "id": 4,
             "name": "Guns N Petals",
             "num_upcoming_shows": 0,
         }]
+    }'''
+    search = request.form['search_term']
+    artists = Artist.query.filter(Artist.name.ilike('%'+search+'%')).all()
+    response = {
+        'count': len(artists),
+        'data': [artist.short_dict() for artist in artists]
     }
     return render_template('pages/search_artists.html', results=response, search_term=request.form.get('search_term', ''))
 
@@ -248,8 +258,8 @@ def search_artists():
 @app.route('/artists/<int:artist_id>')
 def show_artist(artist_id):
     # shows the venue page with the given venue_id
-    # TODO: replace with real venue data from the venues table, using venue_id
-    data1 = {
+    #  replace with real venue data from the venues table, using venue_id
+    '''data1 = {
         "id": 4,
         "name": "Guns N Petals",
         "genres": ["Rock n Roll"],
@@ -261,15 +271,15 @@ def show_artist(artist_id):
         "seeking_venue": True,
         "seeking_description": "Looking for shows to perform at in the San Francisco Bay Area!",
         "image_link": "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80",
-        "past_shows": [{
+ TODO:       "past_shows": [{
             "venue_id": 1,
             "venue_name": "The Musical Hop",
             "venue_image_link": "https://images.unsplash.com/photo-1543900694-133f37abaaa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60",
             "start_time": "2019-05-21T21:30:00.000Z"
         }],
-        "upcoming_shows": [],
-        "past_shows_count": 1,
-        "upcoming_shows_count": 0,
+TODO:        "upcoming_shows": [],
+ TODO:       "past_shows_count": 1,
+ TODO:       "upcoming_shows_count": 0,
     }
     data2 = {
         "id": 5,
@@ -322,6 +332,10 @@ def show_artist(artist_id):
     }
     data = list(filter(lambda d: d['id'] ==
                        artist_id, [data1, data2, data3]))[0]
+    '''
+
+    artist = Artist.query.filter_by(id=artist_id).first_or_404()
+    data = artist.long_dict()
     return render_template('pages/show_artist.html', artist=data)
 
 #  Update
@@ -466,6 +480,8 @@ def shows():
         "artist_image_link": "https://images.unsplash.com/photo-1558369981-f9ca78462e61?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=794&q=80",
         "start_time": "2035-04-15T20:00:00.000Z"
     }]
+    shows = Show.query.all()
+    data = [show.long_dict() for show in shows]
     return render_template('pages/shows.html', shows=data)
 
 
@@ -480,12 +496,31 @@ def create_shows():
 def create_show_submission():
     # called to create new shows in the db, upon submitting new show listing form
     # TODO: insert form data as a new Show record in the db, instead
+    error = False
+    try:
+        show_form = dict(request.form)
+        print(show_form)
+        artist = Artist.query.filter_by(id=show_form.artist_id).first_or_404()
+        venue = Venue.query.filter_by(id=show_form.venue_id).first_or_404()
+        show = Show(show_form.start_time)
+        show.venue = venue
+        show.artist = artist
+        print(show.long_dict())
 
-    # on successful db insert, flash success
-    flash('Show was successfully listed!')
-    # TODO: on unsuccessful db insert, flash an error instead.
-    # e.g., flash('An error occurred. Show could not be listed.')
-    # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
+        db.session.add(show)
+        db.session.commit()
+    except:
+        error = True
+        db.session.rollback()
+        print(sys.exc_info())
+    finally:
+        db.session.close()
+    if error:
+        # on unsuccessful db insert, flash an error instead.
+        flash('An error occurred. Show could not be listed.')
+    else:
+        # on successful db insert, flash success
+        flash('Show was successfully listed!')
     return render_template('pages/home.html')
 
 
