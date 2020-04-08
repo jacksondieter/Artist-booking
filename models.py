@@ -2,7 +2,6 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-
 #----------------------------------------------------------------------------#
 # Models.
 #----------------------------------------------------------------------------#
@@ -19,7 +18,7 @@ class Show(db.Model):
     artist = db.relationship("Artist", back_populates="venues")
     venue = db.relationship("Venue", back_populates="artists")
 
-    def to_dict(self):
+    def long_dict(self):
         return {
             'id': self.id,
             'venue_id': self.venue_id,
@@ -65,7 +64,7 @@ class Venue(db.Model):
         self.seeking_talent = seeking_talent
         self.seeking_description = seeking_description
 
-    def to_dict(self):
+    def long_dict(self):
         return {
             'id': self.id,
             'name': self.name,
@@ -108,7 +107,19 @@ class Artist(db.Model):
 
     venues = db.relationship("Show", back_populates="artist")
 
-    def to_dict(self):
+    def __init__(self, name='', city='', state='', phone='', image_link='', facebook_link='', genres='', website='', seeking_venue=False, seeking_description=''):
+        self.name = name
+        self.city = city
+        self.state = state
+        self.phone = phone
+        self.image_link = image_link
+        self.facebook_link = facebook_link
+        self.genres = ','.join(genres)
+        self.website = website
+        self.seeking_venue = seeking_venue
+        self.seeking_description = seeking_description
+
+    def long_dict(self):
         return {
             'id': self.id,
             'name': self.name,
