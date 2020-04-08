@@ -9,11 +9,13 @@ from flask import Flask, render_template, request, Response, flash, redirect, ur
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from models import db, Show, Venue, Artist
+from models import *
 import logging
 from logging import Formatter, FileHandler
 from flask_wtf import Form
 from forms import *
+from models import db, Show, Venue, Artist
+
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -21,8 +23,10 @@ from forms import *
 app = Flask(__name__)
 moment = Moment(app)
 app.config.from_object('config')
+# db = SQLAlchemy()
 db.init_app(app)
 migrate = Migrate(app, db)
+
 
 #----------------------------------------------------------------------------#
 # Filters.
@@ -57,7 +61,7 @@ def index():
 def venues():
     # TODO: replace with real venues data.
     #       num_shows should be aggregated based on number of upcoming shows per venue.
-    data = [{
+    ''' data = [{
         "city": "San Francisco",
         "state": "CA",
         "venues": [{
@@ -77,7 +81,8 @@ def venues():
             "name": "The Dueling Pianos Bar",
             "num_upcoming_shows": 0,
         }]
-    }]
+    }]'''
+    venues = Venue.query.order_by(Venue.city).all()
     return render_template('pages/venues.html', areas=data)
 
 
@@ -180,6 +185,7 @@ def show_venue(venue_id):
     }
     data = list(filter(lambda d: d['id'] ==
                        venue_id, [data1, data2, data3]))[0]
+
     return render_template('pages/show_venue.html', venue=data)
 
 #  Create Venue
@@ -197,6 +203,20 @@ def create_venue_submission():
     # TODO: insert form data as a new Venue record in the db, instead
     # TODO: modify data to be the data object returned from db insertion
 
+    venue_form = dict(request.form)
+    venue_form['genres'] = request.form.getlist('genres')
+    venue = Venue(**venue_form)
+
+    print(venue.to_dict())
+    try:
+        db.session.add(venue)
+        db.session.commit()
+    except:
+        db.session.rollback()
+        print('error')
+    finally:
+        db.session.close()
+        print('ok')
     # on successful db insert, flash success
     flash('Venue ' + request.form['name'] + ' was successfully listed!')
     # TODO: on unsuccessful db insert, flash an error instead.

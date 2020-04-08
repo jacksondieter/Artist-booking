@@ -2,6 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
+
 #----------------------------------------------------------------------------#
 # Models.
 #----------------------------------------------------------------------------#
@@ -11,15 +12,27 @@ class Show(db.Model):
     __tablename__ = 'Show'
     id = db.Column(db.Integer, primary_key=True)
     venue_id = db.Column(db.Integer, db.ForeignKey(
-        'Venue.id'), primary_key=True)
+        'Venue.id'), nullable=False)
     artist_id = db.Column(db.Integer, db.ForeignKey(
-        'Artist.id'), primary_key=True)
-    start_time = db.Column(db.DateTime)
+        'Artist.id'), nullable=False)
+    start_time = db.Column(db.DateTime, nullable=False)
     artist = db.relationship("Artist", back_populates="venues")
     venue = db.relationship("Venue", back_populates="artists")
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'venue_id': self.venue_id,
+            'venue_name': self.venue.name,
+            'venue_image_link': self.venue.image_link,
+            'artist_id': self.artist_id,
+            'artist_name': self.artist.name,
+            'artist_image_link': self.artist.image_link,
+            'start_time': self.start_time.isoformat()
+        }
+
     def __repr__(self):
-        return f'<Show {self.venue.name} : {self.artist.name}>'
+        return f'<Show {self.artist.name} at {self.venue.name}>'
 
 
 class Venue(db.Model):
@@ -39,7 +52,20 @@ class Venue(db.Model):
     seeking_description = db.Column(db.String(500))
     artists = db.relationship("Show", back_populates="venue")
 
-    def __dict__(self):
+    def __init__(self, name='', city='', state='', address='', phone='', image_link='', facebook_link='', genres='', website='', seeking_talent=False, seeking_description=''):
+        self.name = name
+        self.city = city
+        self.state = state
+        self.address = address
+        self.phone = phone
+        self.image_link = image_link
+        self.facebook_link = facebook_link
+        self.genres = ','.join(genres)
+        self.website = website
+        self.seeking_talent = seeking_talent
+        self.seeking_description = seeking_description
+
+    def to_dict(self):
         return {
             'id': self.id,
             'name': self.name,
@@ -82,7 +108,7 @@ class Artist(db.Model):
 
     venues = db.relationship("Show", back_populates="artist")
 
-    def __dict__(self):
+    def to_dict(self):
         return {
             'id': self.id,
             'name': self.name,
@@ -93,7 +119,7 @@ class Artist(db.Model):
             'image_link': self.image_link,
             'facebook_link': self.facebook_link,
             'website': self.website,
-            'seeking_venue': self.seeking_talent,
+            'seeking_venue': self.seeking_venue,
             'seeking_description': self.seeking_description
         }
 
