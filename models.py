@@ -140,8 +140,6 @@ class Show(db.Model):
     artist_id = db.Column(db.Integer, db.ForeignKey(
         'artists.id'))
     start_time = db.Column(db.DateTime)
-    #artist = db.relationship(Artist, back_populates="venues")
-    #venue = db.relationship(Venue, back_populates="artists")
     venue = db.relationship('Venue', backref=db.backref('shows'))
     artist = db.relationship('Artist', backref=db.backref('shows'))
 
