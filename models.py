@@ -39,6 +39,19 @@ class Venue(db.Model):
         self.seeking_talent = seeking_talent
         self.seeking_description = seeking_description
 
+    def update(self, id, name, city, state, address, phone, image_link, facebook_link, genres, website, seeking_talent, seeking_description):
+        self.name = name
+        self.city = city
+        self.state = state
+        self.address = address
+        self.phone = phone
+        self.image_link = image_link
+        self.facebook_link = facebook_link
+        self.genres = ','.join(genres)
+        self.website = website
+        self.seeking_talent = seeking_talent
+        self.seeking_description = seeking_description
+
     def long_dict(self):
         return {
             'id': self.id,
@@ -89,6 +102,18 @@ class Artist(db.Model):
     venues = db.relationship(Venue, secondary="shows")
 
     def __init__(self, name='', city='', state='', phone='', image_link='', facebook_link='', genres='', website='', seeking_venue=False, seeking_description=''):
+        self.name = name
+        self.city = city
+        self.state = state
+        self.phone = phone
+        self.image_link = image_link
+        self.facebook_link = facebook_link
+        self.genres = ','.join(genres)
+        self.website = website
+        self.seeking_venue = seeking_venue
+        self.seeking_description = seeking_description
+
+    def update(self, id, name, city, state, phone, image_link, facebook_link, genres, website, seeking_venue, seeking_description):
         self.name = name
         self.city = city
         self.state = state
