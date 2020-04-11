@@ -499,12 +499,11 @@ def create_show_submission():
     error = False
     try:
         show_form = dict(request.form)
-        print(show_form)
-        artist = Artist.query.filter_by(id=show_form.artist_id).first_or_404()
-        venue = Venue.query.filter_by(id=show_form.venue_id).first_or_404()
-        show = Show(show_form.start_time)
-        show.venue = venue
-        show.artist = artist
+        artist = Artist.query.filter_by(
+            id=show_form['artist_id']).first_or_404()
+        venue = Venue.query.filter_by(id=show_form['venue_id']).first_or_404()
+        show = Show(venue=venue,
+                    artist=artist, start_time=show_form['start_time'])
         print(show.long_dict())
 
         db.session.add(show)

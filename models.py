@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import relationship, backref
 import datetime
 
 db = SQLAlchemy()
@@ -8,51 +9,8 @@ db = SQLAlchemy()
 #----------------------------------------------------------------------------#
 
 
-class Show(db.Model):
-    __tablename__ = 'Show'
-    id = db.Column(db.Integer, primary_key=True)
-    venue_id = db.Column(db.Integer, db.ForeignKey(
-        'Venue.id'))
-    artist_id = db.Column(db.Integer, db.ForeignKey(
-        'Artist.id'))
-    start_time = db.Column(db.DateTime, nullable=False)
-    artist = db.relationship("Artist", backref="show")
-    venue = db.relationship("Venue", backref="show")
-
-    def long_dict(self):
-        return {
-            'id': self.id,
-            'venue_id': self.Venue.id,
-            'venue_name': self.Venue.name,
-            'venue_image_link': self.Venue.image_link,
-            'artist_id': self.artist_id,
-            'artist_name': self.artist.name,
-            'artist_image_link': self.artist.image_link,
-            'start_time': self.start_time.isoformat()
-        }
-
-    def dict_for_venue(self):
-        return {
-            'artist_id': self.artist_id,
-            'artist_name': self.artist.name,
-            'artist_image_link': self.artist.image_link,
-            'start_time': self.start_time.isoformat()
-        }
-
-    def dict_for_artist(self):
-        return {
-            'venue_id': self.venue_id,
-            'venue_name': self.venue.name,
-            'venue_image_link': self.venue.image_link,
-            'start_time': self.start_time.isoformat()
-        }
-
-    def __repr__(self):
-        return f'<Show {self.artist.name} at {self.venue.name}>'
-
-
 class Venue(db.Model):
-    __tablename__ = 'Venue'
+    __tablename__ = 'venues'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
@@ -66,7 +24,7 @@ class Venue(db.Model):
     website = db.Column(db.String(500))
     seeking_talent = db.Column(db.Boolean)
     seeking_description = db.Column(db.String(500))
-    #artists = db.relationship("Show", back_populates="venue")
+    artists = db.relationship('Artist', secondary="shows")
 
     def __init__(self, name='', city='', state='', address='', phone='', image_link='', facebook_link='', genres='', website='', seeking_talent=False, seeking_description=''):
         self.name = name
@@ -115,7 +73,7 @@ class Venue(db.Model):
 
 
 class Artist(db.Model):
-    __tablename__ = 'Artist'
+    __tablename__ = 'artists'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
@@ -128,8 +86,7 @@ class Artist(db.Model):
     website = db.Column(db.String(500))
     seeking_venue = db.Column(db.Boolean)
     seeking_description = db.Column(db.String(500))
-
-    #venues = db.relationship("Show", back_populates="artist")
+    venues = db.relationship(Venue, secondary="shows")
 
     def __init__(self, name='', city='', state='', phone='', image_link='', facebook_link='', genres='', website='', seeking_venue=False, seeking_description=''):
         self.name = name
@@ -173,3 +130,48 @@ class Artist(db.Model):
     upcoming_shows(venue_id, venue_name,venue_image_link,start_time)
     past_shows_count(int)
     upcoming_shows_count(int) """
+
+
+class Show(db.Model):
+    __tablename__ = 'shows'
+    id = db.Column(db.Integer, primary_key=True)
+    venue_id = db.Column(db.Integer, db.ForeignKey(
+        'venues.id'))
+    artist_id = db.Column(db.Integer, db.ForeignKey(
+        'artists.id'))
+    start_time = db.Column(db.DateTime)
+    #artist = db.relationship(Artist, back_populates="venues")
+    #venue = db.relationship(Venue, back_populates="artists")
+    venue = db.relationship('Venue', backref=db.backref('shows'))
+    artist = db.relationship('Artist', backref=db.backref('shows'))
+
+    def long_dict(self):
+        return {
+            'id': self.id,
+            'venue_id': self.venue_id,
+            'venue_name': self.venue.name,
+            'venue_image_link': self.venue.image_link,
+            'artist_id': self.artist_id,
+            'artist_name': self.artist.name,
+            'artist_image_link': self.artist.image_link,
+            'start_time': self.start_time.strftime("%m/%d/%Y, %H:%M")
+        }
+
+    def dict_for_venue(self):
+        return {
+            'artist_id': self.artist_id,
+            'artist_name': self.artist.name,
+            'artist_image_link': self.artist.image_link,
+            'start_time': self.start_time
+        }
+
+    def dict_for_artist(self):
+        return {
+            'venue_id': self.venue_id,
+            'venue_name': self.venue.name,
+            'venue_image_link': self.venue.image_link,
+            'start_time': self.start_time
+        }
+
+    def __repr__(self):
+        return f'<Show {self.artist.name} at {self.venue.name}>'
