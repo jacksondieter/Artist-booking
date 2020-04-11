@@ -43,37 +43,6 @@ def format_datetime(value, format='medium'):
     return babel.dates.format_datetime(date, format)
 
 
-def split_show_by_time(shows):
-    today = datetime.now()
-    data = {
-        "past_shows": [],
-        "upcoming_shows": [],
-        "past_shows_count": 0,
-        "upcoming_shows_count": 0
-    }
-    for show in shows:
-        if show.start_time < today:
-            data.past_shows.append(show)
-            data.past_show_count += 1
-        else:
-            data.upcoming_shows.append(show)
-            data.upcoming_show_count += 1
-
-    return data
-
-
-def get_show_by_venue(venue_id):
-    shows = Show.query.filter_by(venue_id=venue_id).all()
-    show_for_venue = [show.dict_for_venue for show in shows]
-    return split_show_by_time(show_for_venue)
-
-
-def get_show_by_artist(artist_id):
-    show = Show.query.filter_by(artist_id=artist_id).all()
-    show_for_artist = [show.dict_for_artist for show in shows]
-    return split_show_by_time(show_for_artist)
-
-
 app.jinja_env.filters['datetime'] = format_datetime
 
 #----------------------------------------------------------------------------#
@@ -100,6 +69,7 @@ def venues():
         'state': state,
         'venues': [v.short_dict() for v in venues if v.city == city]
     }for state, city in zone]
+    print(venues[0].shows[0].start_time)
     return render_template('pages/venues.html', areas=venues_by_zone)
 
 

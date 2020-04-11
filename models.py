@@ -1,8 +1,32 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship, backref
-import datetime
+from datetime import datetime
+# from app import get_show_by_venue, get_show_by_artist
 
 db = SQLAlchemy()
+
+
+#----------------------------------------------------------------------------#
+# Filters.
+#----------------------------------------------------------------------------#
+
+def split_show_by_time(shows):
+    today = datetime.now()
+    data = {
+        "past_shows": [],
+        "upcoming_shows": [],
+        "past_shows_count": 0,
+        "upcoming_shows_count": 0
+    }
+    for show in shows:
+        if show.start_time < today:
+            data['past_shows'].append(show.long_dict())
+            data['past_shows_count'] = data.get('past_shows_count', 0) + 1
+        else:
+            data['upcoming_shows'].append(show.long_dict())
+            data['upcoming_shows_count'] = data.get(
+                'upcoming_shows_count', 0) + 1
+    return data
 
 #----------------------------------------------------------------------------#
 # Models.
@@ -53,6 +77,7 @@ class Venue(db.Model):
         self.seeking_description = seeking_description
 
     def long_dict(self):
+        data = split_show_by_time(self.shows)
         return {
             'id': self.id,
             'name': self.name,
@@ -65,24 +90,25 @@ class Venue(db.Model):
             'genres': self.genres.split(','),
             'website': self.website,
             'seeking_talent': self.seeking_talent,
-            'seeking_description': self.seeking_description
+            'seeking_description': self.seeking_description,
+            "past_shows": data['past_shows'],
+            "upcoming_shows": data['upcoming_shows'],
+            "past_shows_count": data['past_shows_count'],
+            "upcoming_shows_count": data['upcoming_shows_count']
         }
 
     def short_dict(self):
+        data = split_show_by_time(self.shows)
         return {
             'id': self.id,
             'name': self.name,
-            'image_link': self.image_link
+            'image_link': self.image_link,
+            "past_shows_count": data['past_shows_count'],
+            "upcoming_shows_count": data['upcoming_shows_count']
         }
 
     def __repr__(self):
         return f'<Venue {self.id} : {self.name}>'
-
-    """
-    past_shows(artist_id, artist_image_link,start_time)
-    upcoming_shows(artist_id, artist_image_link,start_time)
-    past_shows_count(int)
-    upcoming_shows_count(int) """
 
 
 class Artist(db.Model):
@@ -126,6 +152,7 @@ class Artist(db.Model):
         self.seeking_description = seeking_description
 
     def long_dict(self):
+        data = split_show_by_time(self.shows)
         return {
             'id': self.id,
             'name': self.name,
@@ -137,24 +164,25 @@ class Artist(db.Model):
             'facebook_link': self.facebook_link,
             'website': self.website,
             'seeking_venue': self.seeking_venue,
-            'seeking_description': self.seeking_description
+            'seeking_description': self.seeking_description,
+            "past_shows": data['past_shows'],
+            "upcoming_shows": data['upcoming_shows'],
+            "past_shows_count": data['past_shows_count'],
+            "upcoming_shows_count": data['upcoming_shows_count']
         }
 
     def short_dict(self):
+        data = split_show_by_time(self.shows)
         return {
             'id': self.id,
             'name': self.name,
-            'image_link': self.image_link
+            'image_link': self.image_link,
+            "past_shows_count": data['past_shows_count'],
+            "upcoming_shows_count": data['upcoming_shows_count']
         }
 
     def __repr__(self):
         return f'<Artist {self.id} : {self.name}>'
-
-    """
-    past_shows(venue_id, venue_name,venue_image_link,start_time)
-    upcoming_shows(venue_id, venue_name,venue_image_link,start_time)
-    past_shows_count(int)
-    upcoming_shows_count(int) """
 
 
 class Show(db.Model):
