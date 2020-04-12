@@ -76,6 +76,22 @@ class Venue(db.Model):
         self.seeking_talent = seeking_talent
         self.seeking_description = seeking_description
 
+    def data_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'city': self.city,
+            'state': self.state,
+            'address': self.address,
+            'phone': self.phone,
+            'image_link': self.image_link,
+            'facebook_link': self.facebook_link,
+            'genres': self.genres.split(','),
+            'website': self.website,
+            'seeking_talent': self.seeking_talent,
+            'seeking_description': self.seeking_description,
+        }
+
     def long_dict(self):
         data = split_show_by_time(self.shows)
         return {
@@ -150,6 +166,21 @@ class Artist(db.Model):
         self.website = website
         self.seeking_venue = seeking_venue
         self.seeking_description = seeking_description
+
+    def data_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'city': self.city,
+            'state': self.state,
+            'phone': self.phone,
+            'genres': self.genres.split(','),
+            'image_link': self.image_link,
+            'facebook_link': self.facebook_link,
+            'website': self.website,
+            'seeking_venue': self.seeking_venue,
+            'seeking_description': self.seeking_description,
+        }
 
     def long_dict(self):
         data = split_show_by_time(self.shows)

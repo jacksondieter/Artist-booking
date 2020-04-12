@@ -69,7 +69,6 @@ def venues():
         'state': state,
         'venues': [v.short_dict() for v in venues if v.city == city]
     }for state, city in zone]
-    print(venues[0].shows[0].start_time)
     return render_template('pages/venues.html', areas=venues_by_zone)
 
 
@@ -158,7 +157,7 @@ def edit_venue(venue_id):
 
     # populate form with values from venue with ID <venue_id>
     venue = Venue.query.filter_by(id=venue_id).first_or_404()
-    venue_dict = venue.long_dict()
+    venue_dict = venue.data_dict()
     form = VenueForm(**venue_dict)
     return render_template('forms/edit_venue.html', form=form, venue=venue_dict)
 
@@ -172,7 +171,7 @@ def edit_venue_submission(venue_id):
         venue_form = dict(request.form)
         venue_form['genres'] = request.form.getlist('genres')
         venue = Venue.query.filter_by(id=venue_id).first_or_404()
-        old_venue_dict = {**venue.long_dict(), **venue_form}
+        old_venue_dict = {**venue.data_dict(), **venue_form}
         venue.update(**old_venue_dict)
 
         db.session.add(venue)
@@ -245,9 +244,6 @@ def create_artist_submission():
         artist_form = dict(request.form)
         artist_form['genres'] = request.form.getlist('genres')
         artist = Artist(**artist_form)
-
-        print(artist.long_dict())
-
         db.session.add(artist)
         db.session.commit()
     except:
@@ -272,7 +268,7 @@ def edit_artist(artist_id):
 
     # populate form with fields from artist with ID <artist_id>
     artist = Artist.query.filter_by(id=artist_id).first_or_404()
-    artist_dict = artist.long_dict()
+    artist_dict = artist.data_dict()
     form = ArtistForm(**artist_dict)
     return render_template('forms/edit_artist.html', form=form, artist=artist_dict)
 
@@ -286,10 +282,8 @@ def edit_artist_submission(artist_id):
         artist_form = dict(request.form)
         artist_form['genres'] = request.form.getlist('genres')
         artist = Artist.query.filter_by(id=artist_id).first_or_404()
-        old_artist_dict = {**artist.long_dict(), **artist_form}
+        old_artist_dict = {**artist.data_dict(), **artist_form}
         artist.update(**old_artist_dict)
-        print(artist.long_dict())
-
         db.session.add(artist)
         db.session.commit()
     except:
@@ -340,7 +334,6 @@ def create_show_submission():
         venue = Venue.query.filter_by(id=show_form['venue_id']).first_or_404()
         show = Show(venue=venue,
                     artist=artist, start_time=show_form['start_time'])
-        print(show.long_dict())
 
         db.session.add(show)
         db.session.commit()
