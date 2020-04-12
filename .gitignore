@@ -2,6 +2,7 @@
 __pycache__
 venv
 env/
+migrations/
 
 # OS generated files #
 ######################
@@ -13,3 +14,5 @@ env/
 ehthumbs.db
 Thumbs.db
 *.pyc
+data.py
+script.py
