@@ -33,6 +33,9 @@ def split_show_by_time(shows):
 #----------------------------------------------------------------------------#
 
 
+# Venues.
+#----------------------------------------------------------------------------#
+
 class Venue(db.Model):
     __tablename__ = 'venues'
 
@@ -127,6 +130,8 @@ class Venue(db.Model):
         return f'<Venue {self.id} : {self.name}>'
 
 
+# Artist.
+#----------------------------------------------------------------------------#
 class Artist(db.Model):
     __tablename__ = 'artists'
 
@@ -216,6 +221,8 @@ class Artist(db.Model):
         return f'<Artist {self.id} : {self.name}>'
 
 
+# Shows.
+#----------------------------------------------------------------------------#
 class Show(db.Model):
     __tablename__ = 'shows'
     id = db.Column(db.Integer, primary_key=True)
